@@ -1,0 +1,106 @@
+/*  Problem - CLOPAIR
+    Author -  Nilendu Das
+    Spoj_id - nilendu_das 
+    I don't care how you use the code. But I wish you use it for development of your problem solving skills, 
+    not increasing your points in SPOJ. At the end of the day your skill matters, not points.
+*/
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <iterator>
+
+using namespace std;
+
+#define REP(i,n) for((i)=0;(i)<(int)(n);(i)++)
+#define foreach(c,itr) for(__typeof((c).begin()) itr=(c).begin();itr!=(c).end();itr++)
+#define getcx getchar_unlocked
+inline void inp( int &n )//fast input function
+{
+        n=0;
+         int ch=getcx();  int sign=1;
+        while( ch < '0' || ch > '9' ){if(ch=='-')sign=-1; ch=getcx();}
+
+        while(  ch >= '0' && ch <= '9' )
+                n = (n<<3)+(n<<1) + ch-'0', ch=getcx();
+                n=n*sign;
+}
+struct point {double x,y;};
+
+pair <pair <int, int>, int> p[50010]; // x, y, id
+//pair <pair <int, int>, int> ;//:: iterator it;
+double D = 1.0E+9;
+int ans1=-1,ans2=-1;
+
+void dfs(int L, int R){
+  int i,j;
+
+	if(R-L <= 13){
+		for(i=L;i<R;i++) for(j=i+1;j<R;j++){
+			double dx = p[i].first.first - p[j].first.first;
+			double dy = p[i].first.second - p[j].first.second;
+			double d = sqrt(dx*dx + dy*dy);
+			if(d < D){
+				D = d;
+				ans1 = p[i].second;
+				ans2 = p[j].second;
+				if(ans1 > ans2) swap(ans1,ans2);
+			}
+		}
+		return;
+	}
+
+	double X = (p[(L+R)/2-1].first.first + p[(L+R)/2].first.first) / 2.0;
+	dfs(L,(L+R)/2);
+	dfs((L+R)/2,R);
+
+	vector <pair <pair <int, int>, int> > v; // y, x, id
+	for(i=L;i<R;i++){
+		int x = p[i].first.first, y = p[i].first.second, id = p[i].second;
+		if(x > X-D && x < X+D) v.push_back(make_pair(make_pair(y,x),id));
+	}
+	sort(v.begin(),v.end());
+
+	REP(i,v.size()) for(j=i+1;j<=i+v.size();j++) if(j < v.size()){
+		double dx = v[i].first.second - v[j].first.second;
+		double dy = v[i].first.first - v[j].first.first;
+		double d = sqrt(dx*dx + dy*dy);
+		if(d < D){
+			D = d;
+			ans1 = v[i].second;
+			ans2 = v[j].second;
+			if(ans1 > ans2) swap(ans1,ans2);
+		}
+	}
+}
+
+int main(void){
+	int N,i;
+
+	inp(N);
+	REP(i,N) {
+	    inp(p[i].first.first);
+	    inp(p[i].first.second);
+	}
+	REP(i,N) p[i].second = i;
+	sort(p,p+N);
+    //for(int i = 0; i < N; i++)
+      //  cout << p[i].first.first << endl;
+	dfs(0,N);
+	printf("%d %d %.6f\n",ans1,ans2,D);
+
+	return 0;
+}
+
+
